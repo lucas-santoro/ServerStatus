@@ -1,3 +1,5 @@
 bot-token: ""
 guild-id: ""
 channel-id: ""
+
+connection-attempts: 3

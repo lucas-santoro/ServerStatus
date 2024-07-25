@@ -7,10 +7,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import org.slf4j.Logger;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.io.InputStream;
-import java.nio.file.StandardCopyOption;
 
 @Plugin(
         id = "serverstatus",
@@ -27,15 +24,24 @@ public class Main {
     private Path dataDirectory;
 
     private ConfigManager configManager;
+    private DiscordBot discordBot;
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         try {
             configManager = new ConfigManager(dataDirectory, logger);
             configManager.setupConfig();
+
+            String botToken = configManager.getBotToken();
+            String guildId = configManager.getGuildId();
+            String channelId = configManager.getChannelId();
+            int reconnectAttempts = configManager.getReconnectAttempts();
+
+            discordBot = new DiscordBot(botToken, guildId, channelId, logger, reconnectAttempts);
+            discordBot.start();
         } catch (Exception e) {
             logger.error("An error occurred during plugin initialization.", e);
         }
-        logger.info("ServerStatus plugin was enabled!");
+        logger.info("ServerStatus was enabled!");
     }
 }
