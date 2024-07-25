@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.io.InputStream;
+import java.nio.file.StandardCopyOption;
 
 @Plugin(
         id = "serverstatus",
@@ -24,15 +26,16 @@ public class Main {
     @DataDirectory
     private Path dataDirectory;
 
+    private ConfigManager configManager;
+
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         try {
-            if (!Files.exists(dataDirectory)) {
-                Files.createDirectory(dataDirectory);
-            }
+            configManager = new ConfigManager(dataDirectory, logger);
+            configManager.setupConfig();
         } catch (Exception e) {
-            logger.error("It was not possible to create the plugin directory.", e);
+            logger.error("An error occurred during plugin initialization.", e);
         }
-        logger.info("ServerStatus was enabled!");
+        logger.info("ServerStatus plugin was enabled!");
     }
 }
