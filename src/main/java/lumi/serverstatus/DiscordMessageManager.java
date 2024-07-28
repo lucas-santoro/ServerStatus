@@ -28,7 +28,6 @@ public class DiscordMessageManager {
             for (ConfigManager.Field field : embedConfig.getFields()) {
                 embed.addField(field.getName(), field.getValue(), field.isInline());
             }
-            logger.info("Sending embed with fields: {}", embedConfig.getFields());
             channel.sendMessageEmbeds(embed.build()).queue();
         } catch (Exception e) {
             logger.error("An error occurred while sending the embed message.", e);

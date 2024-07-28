@@ -50,7 +50,6 @@ public class ConfigManager {
     private void loadPropertiesFromYAML(InputStream inputStream) {
         Yaml yaml = new Yaml();
         Map<String, Object> yamlProps = yaml.load(inputStream);
-        logger.info("YAML properties: {}", yamlProps);
         flattenProperties("", yamlProps);
     }
 
@@ -72,7 +71,6 @@ public class ConfigManager {
                 properties.put(key, entry.getValue().toString());
             }
         }
-        logger.info("Flattened properties: {}", properties);
     }
 
     public String getBotToken() {

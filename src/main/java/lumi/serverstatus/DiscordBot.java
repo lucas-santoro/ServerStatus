@@ -115,7 +115,6 @@ public class DiscordBot {
         for (ConfigManager.Field field : embedConfig.getFields()) {
             embed.addField(field.getName(), field.getValue(), field.isInline());
         }
-        logger.info("Built embed with fields: {}", embedConfig.getFields());
         return embed;
     }
 
