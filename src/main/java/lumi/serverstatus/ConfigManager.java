@@ -59,10 +59,20 @@ public class ConfigManager {
             String key = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
             if (entry.getValue() instanceof Map) {
                 flattenProperties(key, (Map<String, Object>) entry.getValue());
+            } else if (entry.getValue() instanceof List) {
+                List<?> list = (List<?>) entry.getValue();
+                if (!list.isEmpty() && list.get(0) instanceof Map) {
+                    for (int i = 0; i < list.size(); i++) {
+                        flattenProperties(key + "[" + i + "]", (Map<String, Object>) list.get(i));
+                    }
+                } else {
+                    properties.put(key, entry.getValue().toString());
+                }
             } else {
                 properties.put(key, entry.getValue().toString());
             }
         }
+        logger.info("Flattened properties: {}", properties);
     }
 
     public String getBotToken() {
