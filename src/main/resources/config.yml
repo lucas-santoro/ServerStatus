@@ -1,63 +1,78 @@
+# Your bot token. If you don't know how to get it, watch this video: https://www.youtube.com/watch?v=aI4OmIbkJH8
 bot-token: ""
+# The guild where the bot will send the embed
 guild-id: ""
+# The channel that will be used to send the embed
 channel-id: ""
 
 # How many seconds the bot will wait to update the message
-update-interval: 120
+update-message: 120
 
-#            Connection settings, you probably don't have to change anything here!
-# How many times the plugin will try to reconnect to Discord servers if the connection fails
-connection-attempts: 3
-# Time in seconds to wait before trying to reconnect if the connection fails
-reconnect-interval: 5
+# Embeds, feel free to personalize them!
 
+# Placeholders:
+# %time% -> The time in HH:mm:ss format
+# %date% -> The date in dd/MM/yyyy format
+# %date-us% -> The date in MM/dd/yyyy format
+# %player_count% -> The number of players online
+# %max_players% -> The maximum number of players that can be online
+# %players_list% -> The server's players list
 
-# Online embed
+# Use \n to skip a line
+# Embeds also support markdown, which you can use to format the text. If you want to learn more about markdown, check this link: https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51
+# All colors should be in HEX format, like: #7edb64
+
 online-embed:
-  title: "Status"
-  timestamp: true
-  color: "#5897984"  # HEX color
+  title: "Server Status"
+  timestamp: false
+  color: "#7edb64"
   fields:
-    - name: "Status   |"
-      value: "Online   |"
+    - name: "> **Status**"
+      value: "```fix\nOnline```"
       inline: true
-    - name: "Players"
-      value: "%player_count%"
+    - name: "> **Players**"
+      value: "```cs\n%player_count%```"
       inline: true
     - name: "IP:"
-      value: "```onewaycraft.net```"
+      value: "```prolog\nONEWAYCRAFT.NET```"
       inline: false
     - name: "Bedrock port:"
-      value: "```19132```"
+      value: "```yaml\n19132```"
       inline: false
   avatar: ""
   avatar_url: ""
-  image: ""
+  image: "https://i.imgur.com/lX19VI7.png"
   thumbnail: ""
-  footer: ""
+  footer: "Last update: %time%"
   footer_icon: ""
 
-# Offline embed
 offline-embed:
-  title: "Status"
-  timestamp: true
-  color: "#5897984"  # HEX color
+  title: "Server Status"
+  timestamp: false
+  color: "#ca3931"  # HEX color
   fields:
-    - name: "Status   |"
-      value: "Offline   |"
+    - name: "> **Status**"
+      value: "```ml\nOffline```"
       inline: true
-    - name: "Players"
-      value: "N/A "
+    - name: "> **Players**"
+      value: "```%player_count%```"
       inline: true
     - name: "IP:"
       value: "```onewaycraft.net```"
       inline: false
     - name: "Bedrock port:"
-      value: "```19132```"
+      value: "```yaml\n19132```"
       inline: false
+  avatar: ""
+  avatar_url: ""
+  image: "https://i.imgur.com/kDJ3uCV.png"
+  thumbnail: ""
+  footer: "Shutdown time: %date% - %time%"
+  footer_icon: ""
 
-# Maintenance embed
-maintenance-embed:
-  title: ""
-  description: ""
-  color: ""
+
+  # Connection settings, you probably don't have to change anything here!
+  # How many times the plugin will try to reconnect to Discord servers if the connection fails
+  connection-attempts: 3
+  # Time in seconds to wait before trying to reconnect if the connection fails
+  reconnect-interval: 5

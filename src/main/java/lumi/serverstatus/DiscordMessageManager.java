@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.slf4j.Logger;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.OffsetDateTime;
@@ -83,7 +84,12 @@ public class DiscordMessageManager {
 
         if (!embedConfig.getFooter().isEmpty()) {
             if (!embedConfig.getFooterIcon().isEmpty()) {
-                embed.setFooter(replacePlaceholders(embedConfig.getFooter()), embedConfig.getFooterIcon());
+                if (isValidURL(embedConfig.getFooterIcon())) {
+                    embed.setFooter(replacePlaceholders(embedConfig.getFooter()), embedConfig.getFooterIcon());
+                } else {
+                    logger.warn("Invalid footer icon URL: {}", embedConfig.getFooterIcon());
+                    embed.setFooter(replacePlaceholders(embedConfig.getFooter()));
+                }
             } else {
                 embed.setFooter(replacePlaceholders(embedConfig.getFooter()));
             }
@@ -94,8 +100,11 @@ public class DiscordMessageManager {
 
     private String replacePlaceholders(String text) {
         Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("%time%", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        placeholders.put("%date%", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        placeholders.put("%date-us%", LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")));
         placeholders.put("%player_count%", String.valueOf(playerCountListener.getPlayerCount()));
-        placeholders.put("%hh:mm:ss%", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        placeholders.put("%max_players%", String.valueOf(playerCountListener.getMaxPlayers()));
 
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
             text = text.replace(entry.getKey(), entry.getValue());
@@ -104,14 +113,24 @@ public class DiscordMessageManager {
         return text;
     }
 
-    public void updateMessagePeriodically(TextChannel channel, int updateInterval) {
+    private boolean isValidURL(String url) {
+        try {
+            new java.net.URL(url).toURI();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void updateMessagePeriodically(TextChannel channel, long intervalSeconds) {
         Runnable task = () -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    Thread.sleep(updateInterval * 1000);
+                    Thread.sleep(intervalSeconds * 1000);
                     if (lastMessage != null) {
                         editEmbed(lastMessage, configManager.getOnlineEmbedConfig());
                     } else {
+                        logger.info(playerCountListener.getPlayers());
                         findLastMessage(channel);
                     }
                 } catch (InterruptedException e) {
@@ -132,9 +151,4 @@ public class DiscordMessageManager {
         }
     }
 
-    public void updatePlayerCount(int playerCount) {
-        if (lastMessage != null) {
-            editEmbed(lastMessage, configManager.getOnlineEmbedConfig());
-        }
-    }
 }

@@ -19,4 +19,12 @@ public class PlayerCountListener {
     public int getPlayerCount() {
         return server.getPlayerCount();
     }
+
+    public int getMaxPlayers(){
+        return server.getConfiguration().getShowMaxPlayers();
+    }
+
+    public String getPlayers(){
+        return server.getAllPlayers().toString();
+    }
 }
