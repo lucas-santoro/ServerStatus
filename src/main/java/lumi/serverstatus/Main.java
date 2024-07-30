@@ -6,6 +6,8 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ProxyServer;
+import lumi.serverstatus.listeners.PlayerCountListener;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -24,6 +26,9 @@ public class Main {
     @DataDirectory
     private Path dataDirectory;
 
+    @Inject
+    private ProxyServer server;
+
     private ConfigManager configManager = null;
     private DiscordBot discordBot;
 
@@ -38,10 +43,16 @@ public class Main {
             String channelId = configManager.getChannelId();
             int reconnectAttempts = configManager.getReconnectAttempts();
             int reconnectInterval = configManager.getReconnectInterval();
+            int updateInterval = configManager.getUpdateInterval();
 
-            DiscordMessageManager messageManager = new DiscordMessageManager(logger, configManager);
-            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, configManager,logger);
+            PlayerCountListener playerCountListener = new PlayerCountListener(server, null, logger);
+            DiscordMessageManager messageManager = new DiscordMessageManager(logger, configManager, playerCountListener);
+            playerCountListener = new PlayerCountListener(server, messageManager, logger);
+
+            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, updateInterval,logger);
             discordBot.start();
+
+            server.getEventManager().register(this, playerCountListener);
         } catch (Exception e) {
             logger.error("An error occurred during plugin initialization.", e);
         }

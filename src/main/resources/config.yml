@@ -3,7 +3,7 @@ guild-id: ""
 channel-id: ""
 
 # How many seconds the bot will wait to update the message
-update-message: 120
+update-interval: 120
 
 #            Connection settings, you probably don't have to change anything here!
 # How many times the plugin will try to reconnect to Discord servers if the connection fails
@@ -11,7 +11,6 @@ connection-attempts: 3
 # Time in seconds to wait before trying to reconnect if the connection fails
 reconnect-interval: 5
 
-#                                             Embeds
 
 # Online embed
 online-embed:
@@ -23,7 +22,7 @@ online-embed:
       value: "Online   |"
       inline: true
     - name: "Players"
-      value: "100 "
+      value: "%player_count%"
       inline: true
     - name: "IP:"
       value: "```onewaycraft.net```"
@@ -31,6 +30,12 @@ online-embed:
     - name: "Bedrock port:"
       value: "```19132```"
       inline: false
+  avatar: ""
+  avatar_url: ""
+  image: ""
+  thumbnail: ""
+  footer: ""
+  footer_icon: ""
 
 # Offline embed
 offline-embed:

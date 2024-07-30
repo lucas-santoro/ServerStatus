@@ -16,9 +16,9 @@ public class DiscordBot {
     private final int reconnectInterval;
     private final Logger logger;
     private final DiscordMessageManager messageManager;
-    private final ConfigManager configManager; // Adiciona a variável configManager
+    private final int updateInterval;
 
-    public DiscordBot(String botToken, String guildId, String channelId, int reconnectAttempts, int reconnectInterval, DiscordMessageManager messageManager, ConfigManager configManager, Logger logger) {
+    public DiscordBot(String botToken, String guildId, String channelId, int reconnectAttempts, int reconnectInterval, DiscordMessageManager messageManager, int updateInterval, Logger logger) {
         this.botToken = botToken;
         this.guildId = guildId;
         this.channelId = channelId;
@@ -26,7 +26,7 @@ public class DiscordBot {
         this.reconnectInterval = reconnectInterval;
         this.logger = logger;
         this.messageManager = messageManager;
-        this.configManager = configManager;
+        this.updateInterval = updateInterval;
     }
 
     public void start() {
@@ -41,11 +41,8 @@ public class DiscordBot {
                 if (guild != null) {
                     TextChannel channel = guild.getTextChannelById(channelId);
                     if (channel != null) {
-                        boolean messageFound = messageManager.findLastMessage(channel);
-                        if (!messageFound) {
-                            messageManager.sendEmbed(channel, configManager.getOnlineEmbedConfig());
-                        }
-                        messageManager.updateMessagePeriodically(channel, 120); // Atualiza a cada 120 segundos
+                        messageManager.findLastMessage(channel);
+                        messageManager.updateMessagePeriodically(channel, updateInterval);
                     } else {
                         logger.warn("TextChannel not found for ID: " + channelId);
                     }

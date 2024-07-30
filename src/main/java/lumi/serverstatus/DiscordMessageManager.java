@@ -5,18 +5,25 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.slf4j.Logger;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import lumi.serverstatus.listeners.PlayerCountListener;
 
 public class DiscordMessageManager {
 
     private final Logger logger;
     private final ConfigManager configManager;
+    private final PlayerCountListener playerCountListener;
     private Message lastMessage;
 
-    public DiscordMessageManager(Logger logger, ConfigManager configManager) {
+    public DiscordMessageManager(Logger logger, ConfigManager configManager, PlayerCountListener playerCountListener) {
         this.logger = logger;
         this.configManager = configManager;
+        this.playerCountListener = playerCountListener;
     }
 
     public void sendEmbed(TextChannel channel, ConfigManager.EmbedConfig embedConfig) {
@@ -37,38 +44,71 @@ public class DiscordMessageManager {
         }
     }
 
-    public boolean findLastMessage(TextChannel channel) {
+    public void findLastMessage(TextChannel channel) {
         List<Message> messages = channel.getHistory().retrievePast(10).complete();
         for (Message message : messages) {
             if (message.getAuthor().getId().equals(channel.getJDA().getSelfUser().getId())) {
                 lastMessage = message;
                 editEmbed(message, configManager.getOnlineEmbedConfig());
-                return true;
+                return;
             }
         }
         sendEmbed(channel, configManager.getOnlineEmbedConfig());
-        return false;
     }
 
     private EmbedBuilder buildEmbed(ConfigManager.EmbedConfig embedConfig) {
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle(embedConfig.getTitle());
+        embed.setTitle(replacePlaceholders(embedConfig.getTitle()));
+        embed.setDescription(replacePlaceholders(embedConfig.getDescription()));
         if (embedConfig.isTimestamp()) {
             embed.setTimestamp(OffsetDateTime.now());
         }
         embed.setColor(embedConfig.getColor());
 
         for (ConfigManager.Field field : embedConfig.getFields()) {
-            embed.addField(field.getName(), field.getValue(), field.isInline());
+            embed.addField(replacePlaceholders(field.getName()), replacePlaceholders(field.getValue()), field.isInline());
         }
+
+        if (!embedConfig.getAvatar().isEmpty()) {
+            embed.setAuthor(embedConfig.getAvatar(), embedConfig.getAvatarUrl(), embedConfig.getAvatarUrl());
+        }
+
+        if (!embedConfig.getImage().isEmpty()) {
+            embed.setImage(embedConfig.getImage());
+        }
+
+        if (!embedConfig.getThumbnail().isEmpty()) {
+            embed.setThumbnail(embedConfig.getThumbnail());
+        }
+
+        if (!embedConfig.getFooter().isEmpty()) {
+            if (!embedConfig.getFooterIcon().isEmpty()) {
+                embed.setFooter(replacePlaceholders(embedConfig.getFooter()), embedConfig.getFooterIcon());
+            } else {
+                embed.setFooter(replacePlaceholders(embedConfig.getFooter()));
+            }
+        }
+
         return embed;
     }
 
-    public void updateMessagePeriodically(TextChannel channel, long intervalSeconds) {
+    private String replacePlaceholders(String text) {
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("%player_count%", String.valueOf(playerCountListener.getPlayerCount()));
+        placeholders.put("%hh:mm:ss%", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            text = text.replace(entry.getKey(), entry.getValue());
+        }
+
+        return text;
+    }
+
+    public void updateMessagePeriodically(TextChannel channel, int updateInterval) {
         Runnable task = () -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    Thread.sleep(intervalSeconds * 1000);
+                    Thread.sleep(updateInterval * 1000);
                     if (lastMessage != null) {
                         editEmbed(lastMessage, configManager.getOnlineEmbedConfig());
                     } else {
@@ -88,14 +128,13 @@ public class DiscordMessageManager {
         if (lastMessage != null) {
             editEmbed(lastMessage, configManager.getOfflineEmbedConfig());
         } else {
-            List<Message> messages = channel.getHistory().retrievePast(10).complete();
-            for (Message message : messages) {
-                if (message.getAuthor().getId().equals(channel.getJDA().getSelfUser().getId())) {
-                    editEmbed(message, configManager.getOfflineEmbedConfig());
-                    return;
-                }
-            }
             sendEmbed(channel, configManager.getOfflineEmbedConfig());
+        }
+    }
+
+    public void updatePlayerCount(int playerCount) {
+        if (lastMessage != null) {
+            editEmbed(lastMessage, configManager.getOnlineEmbedConfig());
         }
     }
 }

@@ -17,11 +17,13 @@ import java.util.Properties;
 public class ConfigManager {
 
     private final Path dataDirectory;
+    private final Logger logger;
     private final Path configFile;
     private Properties properties;
 
     public ConfigManager(Path dataDirectory, Logger logger) {
         this.dataDirectory = dataDirectory;
+        this.logger = logger;
         this.configFile = dataDirectory.resolve("config.yml");
         this.properties = new Properties();
     }
@@ -73,11 +75,11 @@ public class ConfigManager {
     }
 
     public String getGuildId() {
-        return properties.getProperty("guild-id");
+        return properties.getProperty("guild-id").replaceAll("^\"|\"$", "");
     }
 
     public String getChannelId() {
-        return properties.getProperty("channel-id");
+        return properties.getProperty("channel-id").replaceAll("^\"|\"$", "");
     }
 
     public int getReconnectAttempts() {
@@ -88,6 +90,10 @@ public class ConfigManager {
         return Integer.parseInt(properties.getProperty("reconnect-interval", "5"));
     }
 
+    public int getUpdateInterval(){
+        return Integer.parseInt(properties.getProperty("update-interval", "120"));
+    }
+
     public EmbedConfig getOnlineEmbedConfig() {
         return getEmbedConfig("online-embed");
     }
@@ -96,10 +102,19 @@ public class ConfigManager {
         return getEmbedConfig("offline-embed");
     }
 
+
     private EmbedConfig getEmbedConfig(String prefix) {
         String title = properties.getProperty(prefix + ".title", "Status");
+        String description = properties.getProperty(prefix + ".description", "");
         boolean timestamp = Boolean.parseBoolean(properties.getProperty(prefix + ".timestamp", "true"));
         Color color = Color.decode(properties.getProperty(prefix + ".color", "#5897984"));
+
+        String avatar = properties.getProperty(prefix + ".avatar", "");
+        String avatarUrl = properties.getProperty(prefix + ".avatar_url", "");
+        String image = properties.getProperty(prefix + ".image", "");
+        String thumbnail = properties.getProperty(prefix + ".thumbnail", "");
+        String footer = properties.getProperty(prefix + ".footer", "");
+        String footerIcon = properties.getProperty(prefix + ".footer_icon", "");
 
         List<Field> fields = new ArrayList<>();
         int index = 0;
@@ -111,7 +126,7 @@ public class ConfigManager {
             index++;
         }
 
-        return new EmbedConfig(title, timestamp, color, fields);
+        return new EmbedConfig(title, description, timestamp, color, fields, avatar, avatarUrl, image, thumbnail, footer, footerIcon);
     }
 
     public static class Field {
@@ -145,19 +160,37 @@ public class ConfigManager {
 
     public static class EmbedConfig {
         private final String title;
+        private final String description;
         private final boolean timestamp;
         private final Color color;
         private final List<Field> fields;
+        private final String avatar;
+        private final String avatarUrl;
+        private final String image;
+        private final String thumbnail;
+        private final String footer;
+        private final String footerIcon;
 
-        public EmbedConfig(String title, boolean timestamp, Color color, List<Field> fields) {
+        public EmbedConfig(String title, String description, boolean timestamp, Color color, List<Field> fields, String avatar, String avatarUrl, String image, String thumbnail, String footer, String footerIcon) {
             this.title = title;
+            this.description = description;
             this.timestamp = timestamp;
             this.color = color;
             this.fields = fields;
+            this.avatar = avatar;
+            this.avatarUrl = avatarUrl;
+            this.image = image;
+            this.thumbnail = thumbnail;
+            this.footer = footer;
+            this.footerIcon = footerIcon;
         }
 
         public String getTitle() {
             return title;
+        }
+
+        public String getDescription() {
+            return description;
         }
 
         public boolean isTimestamp() {
@@ -172,9 +205,33 @@ public class ConfigManager {
             return fields;
         }
 
+        public String getAvatar() {
+            return avatar;
+        }
+
+        public String getAvatarUrl() {
+            return avatarUrl;
+        }
+
+        public String getImage() {
+            return image;
+        }
+
+        public String getThumbnail() {
+            return thumbnail;
+        }
+
+        public String getFooter() {
+            return footer;
+        }
+
+        public String getFooterIcon() {
+            return footerIcon;
+        }
+
         @Override
         public String toString() {
-            return "EmbedConfig{title='" + title + "', timestamp=" + timestamp + ", color=" + color + ", fields=" + fields + "}";
+            return "EmbedConfig{title='" + title + "', description='" + description + "', timestamp=" + timestamp + ", color=" + color + ", fields=" + fields + ", avatar='" + avatar + "', avatarUrl='" + avatarUrl + "', image='" + image + "', thumbnail='" + thumbnail + "', footer='" + footer + "', footerIcon='" + footerIcon + "'}";
         }
     }
 }
