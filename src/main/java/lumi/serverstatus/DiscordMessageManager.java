@@ -130,7 +130,6 @@ public class DiscordMessageManager {
                     if (lastMessage != null) {
                         editEmbed(lastMessage, configManager.getOnlineEmbedConfig());
                     } else {
-                        logger.info(playerCountListener.getPlayers());
                         findLastMessage(channel);
                     }
                 } catch (InterruptedException e) {
@@ -151,4 +150,9 @@ public class DiscordMessageManager {
         }
     }
 
+    public void updatePlayerCount(int playerCount) {
+        if (lastMessage != null) {
+            editEmbed(lastMessage, configManager.getOnlineEmbedConfig());
+        }
+    }
 }

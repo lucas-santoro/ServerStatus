@@ -43,13 +43,11 @@ public class Main {
             String channelId = configManager.getChannelId();
             int reconnectAttempts = configManager.getReconnectAttempts();
             int reconnectInterval = configManager.getReconnectInterval();
-            int updateInterval = configManager.getUpdateInterval();
 
             PlayerCountListener playerCountListener = new PlayerCountListener(server, null, logger);
             DiscordMessageManager messageManager = new DiscordMessageManager(logger, configManager, playerCountListener);
-            playerCountListener = new PlayerCountListener(server, messageManager, logger);
 
-            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, updateInterval,logger);
+            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, logger);
             discordBot.start();
 
             server.getEventManager().register(this, playerCountListener);
@@ -62,6 +60,7 @@ public class Main {
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
         if (discordBot != null) {
+            discordBot.setOfflineStatus();
             discordBot.shutdown();
         }
         logger.info("ServerStatus was disabled!");

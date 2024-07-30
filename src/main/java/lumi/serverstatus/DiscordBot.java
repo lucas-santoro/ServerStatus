@@ -16,9 +16,8 @@ public class DiscordBot {
     private final int reconnectInterval;
     private final Logger logger;
     private final DiscordMessageManager messageManager;
-    private final int updateInterval;
 
-    public DiscordBot(String botToken, String guildId, String channelId, int reconnectAttempts, int reconnectInterval, DiscordMessageManager messageManager, int updateInterval, Logger logger) {
+    public DiscordBot(String botToken, String guildId, String channelId, int reconnectAttempts, int reconnectInterval, DiscordMessageManager messageManager, Logger logger) {
         this.botToken = botToken;
         this.guildId = guildId;
         this.channelId = channelId;
@@ -26,7 +25,6 @@ public class DiscordBot {
         this.reconnectInterval = reconnectInterval;
         this.logger = logger;
         this.messageManager = messageManager;
-        this.updateInterval = updateInterval;
     }
 
     public void start() {
@@ -42,7 +40,7 @@ public class DiscordBot {
                     TextChannel channel = guild.getTextChannelById(channelId);
                     if (channel != null) {
                         messageManager.findLastMessage(channel);
-                        messageManager.updateMessagePeriodically(channel, updateInterval);
+                        messageManager.updateMessagePeriodically(channel, 120);
                     } else {
                         logger.warn("TextChannel not found for ID: " + channelId);
                     }
@@ -67,15 +65,18 @@ public class DiscordBot {
         }
     }
 
+    public void setOfflineStatus() {
+        Guild guild = jda.getGuildById(guildId);
+        if (guild != null) {
+            TextChannel channel = guild.getTextChannelById(channelId);
+            if (channel != null) {
+                messageManager.setOfflineStatus(channel);
+            }
+        }
+    }
+
     public void shutdown() {
         if (jda != null) {
-            Guild guild = jda.getGuildById(guildId);
-            if (guild != null) {
-                TextChannel channel = guild.getTextChannelById(channelId);
-                if (channel != null) {
-                    messageManager.setOfflineStatus(channel);
-                }
-            }
             jda.shutdown();
         }
     }
