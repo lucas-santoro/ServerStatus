@@ -6,7 +6,7 @@ guild-id: ""
 channel-id: ""
 
 # How many seconds the bot will wait to update the message
-update-message: 120
+update-interval: 120
 
 # Embeds, feel free to personalize them!
 

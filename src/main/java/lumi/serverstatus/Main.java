@@ -15,7 +15,7 @@ import java.nio.file.Path;
 @Plugin(
         id = "serverstatus",
         name = "ServerStatus",
-        version = "1.0"
+        version = "1.1"
 )
 public class Main {
 
