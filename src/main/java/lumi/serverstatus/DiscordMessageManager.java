@@ -122,11 +122,11 @@ public class DiscordMessageManager {
         }
     }
 
-    public void updateMessagePeriodically(TextChannel channel, long intervalSeconds) {
+    public void updateMessagePeriodically(TextChannel channel, int updateInterval) {
         Runnable task = () -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    Thread.sleep(intervalSeconds * 1000);
+                    Thread.sleep(updateInterval * 1000);
                     if (lastMessage != null) {
                         editEmbed(lastMessage, configManager.getOnlineEmbedConfig());
                     } else {

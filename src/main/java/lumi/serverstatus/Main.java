@@ -15,7 +15,7 @@ import java.nio.file.Path;
 @Plugin(
         id = "serverstatus",
         name = "ServerStatus",
-        version = "1.0-SNAPSHOT"
+        version = "1.0"
 )
 public class Main {
 
@@ -43,11 +43,12 @@ public class Main {
             String channelId = configManager.getChannelId();
             int reconnectAttempts = configManager.getReconnectAttempts();
             int reconnectInterval = configManager.getReconnectInterval();
+            int updateInterval = configManager.getUpdateInterval();
 
             PlayerCountListener playerCountListener = new PlayerCountListener(server, null, logger);
             DiscordMessageManager messageManager = new DiscordMessageManager(logger, configManager, playerCountListener);
 
-            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, logger);
+            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, updateInterval, logger);
             discordBot.start();
 
             server.getEventManager().register(this, playerCountListener);

@@ -16,8 +16,9 @@ public class DiscordBot {
     private final int reconnectInterval;
     private final Logger logger;
     private final DiscordMessageManager messageManager;
+    private final int intervalUpdate;
 
-    public DiscordBot(String botToken, String guildId, String channelId, int reconnectAttempts, int reconnectInterval, DiscordMessageManager messageManager, Logger logger) {
+    public DiscordBot(String botToken, String guildId, String channelId, int reconnectAttempts, int reconnectInterval, DiscordMessageManager messageManager, int intervalUpdate,Logger logger) {
         this.botToken = botToken;
         this.guildId = guildId;
         this.channelId = channelId;
@@ -25,6 +26,7 @@ public class DiscordBot {
         this.reconnectInterval = reconnectInterval;
         this.logger = logger;
         this.messageManager = messageManager;
+        this.intervalUpdate = intervalUpdate;
     }
 
     public void start() {
@@ -40,7 +42,7 @@ public class DiscordBot {
                     TextChannel channel = guild.getTextChannelById(channelId);
                     if (channel != null) {
                         messageManager.findLastMessage(channel);
-                        messageManager.updateMessagePeriodically(channel, 120);
+                        messageManager.updateMessagePeriodically(channel, intervalUpdate);
                     } else {
                         logger.warn("TextChannel not found for ID: " + channelId);
                     }
