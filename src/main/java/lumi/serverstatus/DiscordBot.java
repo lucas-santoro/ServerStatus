@@ -3,7 +3,6 @@ package lumi.serverstatus;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.slf4j.Logger;
 
@@ -17,7 +16,7 @@ public class DiscordBot {
     private final int reconnectInterval;
     private final Logger logger;
     private final DiscordMessageManager messageManager;
-    private final ConfigManager configManager;
+    private final ConfigManager configManager; // Adiciona a variável configManager
 
     public DiscordBot(String botToken, String guildId, String channelId, int reconnectAttempts, int reconnectInterval, DiscordMessageManager messageManager, ConfigManager configManager, Logger logger) {
         this.botToken = botToken;
@@ -42,7 +41,11 @@ public class DiscordBot {
                 if (guild != null) {
                     TextChannel channel = guild.getTextChannelById(channelId);
                     if (channel != null) {
-                        findLastMessage(channel);
+                        boolean messageFound = messageManager.findLastMessage(channel);
+                        if (!messageFound) {
+                            messageManager.sendEmbed(channel, configManager.getOnlineEmbedConfig());
+                        }
+                        messageManager.updateMessagePeriodically(channel, 120); // Atualiza a cada 120 segundos
                     } else {
                         logger.warn("TextChannel not found for ID: " + channelId);
                     }
@@ -67,22 +70,15 @@ public class DiscordBot {
         }
     }
 
-    public void findLastMessage(TextChannel channel) {
-        channel.getHistory().retrievePast(1).queue(messages -> {
-            for (Message message : messages) {
-                if (message.getAuthor().getId().equals(jda.getSelfUser().getId())) {
-                    messageManager.editEmbed(message, configManager.getOnlineEmbedConfig());
-                } else {
-                    messageManager.sendEmbed(channel, configManager.getOnlineEmbedConfig());
-                }
-            }
-        }, throwable -> {
-            logger.error("Failed to retrieve message history", throwable);
-        });
-    }
-
     public void shutdown() {
         if (jda != null) {
+            Guild guild = jda.getGuildById(guildId);
+            if (guild != null) {
+                TextChannel channel = guild.getTextChannelById(channelId);
+                if (channel != null) {
+                    messageManager.setOfflineStatus(channel);
+                }
+            }
             jda.shutdown();
         }
     }

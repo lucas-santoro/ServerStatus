@@ -2,6 +2,7 @@ package lumi.serverstatus;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
@@ -39,11 +40,19 @@ public class Main {
             int reconnectInterval = configManager.getReconnectInterval();
 
             DiscordMessageManager messageManager = new DiscordMessageManager(logger, configManager);
-            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, configManager, logger);
+            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, configManager,logger);
             discordBot.start();
         } catch (Exception e) {
             logger.error("An error occurred during plugin initialization.", e);
         }
         logger.info("ServerStatus was enabled!");
+    }
+
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        if (discordBot != null) {
+            discordBot.shutdown();
+        }
+        logger.info("ServerStatus was disabled!");
     }
 }
