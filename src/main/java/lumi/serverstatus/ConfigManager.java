@@ -17,13 +17,11 @@ import java.util.Properties;
 public class ConfigManager {
 
     private final Path dataDirectory;
-    private final Logger logger;
     private final Path configFile;
     private Properties properties;
 
     public ConfigManager(Path dataDirectory, Logger logger) {
         this.dataDirectory = dataDirectory;
-        this.logger = logger;
         this.configFile = dataDirectory.resolve("config.yml");
         this.properties = new Properties();
     }
@@ -36,9 +34,6 @@ public class ConfigManager {
         if (!Files.exists(configFile)) {
             try (InputStream in = getClass().getResourceAsStream("/config.yml")) {
                 Files.copy(in, configFile, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                logger.error("It was not possible to create the config.yml file.", e);
-                throw e;
             }
         }
 
@@ -74,7 +69,7 @@ public class ConfigManager {
     }
 
     public String getBotToken() {
-        return properties.getProperty("bot-token").replaceAll("^\"|\"$", "");  // Remove aspas extras
+        return properties.getProperty("bot-token").replaceAll("^\"|\"$", "");
     }
 
     public String getGuildId() {
@@ -86,11 +81,11 @@ public class ConfigManager {
     }
 
     public int getReconnectAttempts() {
-        return Integer.parseInt(properties.getProperty("reconnect-attempts", "3"));  // Valor padrão 3
+        return Integer.parseInt(properties.getProperty("reconnect-attempts", "3"));
     }
 
     public int getReconnectInterval() {
-        return Integer.parseInt(properties.getProperty("reconnect-interval", "5"));  // Valor padrão 5 segundos
+        return Integer.parseInt(properties.getProperty("reconnect-interval", "5"));
     }
 
     public EmbedConfig getOnlineEmbedConfig() {
@@ -115,8 +110,6 @@ public class ConfigManager {
             fields.add(new Field(name, value, inline));
             index++;
         }
-
-        logger.info("Loaded embed config: title={}, timestamp={}, color={}, fields={}", title, timestamp, color, fields);
 
         return new EmbedConfig(title, timestamp, color, fields);
     }

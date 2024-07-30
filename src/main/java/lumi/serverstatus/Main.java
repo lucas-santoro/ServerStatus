@@ -6,10 +6,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import org.slf4j.Logger;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Plugin(
@@ -41,9 +38,9 @@ public class Main {
             int reconnectAttempts = configManager.getReconnectAttempts();
             int reconnectInterval = configManager.getReconnectInterval();
 
-            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, configManager, logger);
+            DiscordMessageManager messageManager = new DiscordMessageManager(logger, configManager);
+            discordBot = new DiscordBot(botToken, guildId, channelId, reconnectAttempts, reconnectInterval, messageManager, configManager, logger);
             discordBot.start();
-            discordBot.findLastMessage(channelId);
         } catch (Exception e) {
             logger.error("An error occurred during plugin initialization.", e);
         }
